@@ -593,7 +593,7 @@ module.exports = (function (doc, _win) {
 
 
     //expose Stickyfill
-    var sf = {
+    var Stickyfill = {
         stickies: watchArray,
         add: add,
         remove: remove,
@@ -608,13 +608,13 @@ module.exports = (function (doc, _win) {
         (function ($) {
             $.fn.Stickyfill = function (options) {
                 this.each(function () {
-                    sf.add(this);
+                    Stickyfill.add(this);
                 });
 
                 return this;
             };
         })(_win.jQuery);
     }
-    return sf;
+    return Stickyfill;
 });
 
