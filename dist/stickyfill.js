@@ -18,21 +18,22 @@
 
 'use strict';
 
-module.exports = (function(doc, _win) {
+module.exports = (function (doc, _win) {
 
-  if (!doc) {
-    doc = document;
-  }
-  if (!_win) {
-    _win = window;
-  }
+    if (!doc) {
+        doc = document;
+    }
+    if (!_win) {
+        _win = window;
+    }
 
 
     var watchArray = [],
         boundingElements = [{node: _win}],
         initialized = false,
         html = doc.documentElement,
-        noop = function() {},
+        noop = function () {
+        },
         checkTimer,
 
     //visibility API strings
@@ -68,7 +69,8 @@ module.exports = (function(doc, _win) {
         try {
             block.style.position = prefixes[i] + 'sticky';
         }
-        catch(e) {}
+        catch (e) {
+        }
         if (block.style.position != '') {
             seppuku();
         }
@@ -94,8 +96,10 @@ module.exports = (function(doc, _win) {
     }
 
     function getOffset(el) {
-        return {top: el.pageYOffset || el.scrollTop || 0,
-            left: el.pageXOffset || el.scrollLeft || 0};
+        return {
+            top: el.pageYOffset || el.scrollTop || 0,
+            left: el.pageXOffset || el.scrollLeft || 0
+        };
     }
 
     function updateScrollPos() {
@@ -134,7 +138,7 @@ module.exports = (function(doc, _win) {
         var el = event.currentTarget,
             cached = getBoundingElement(el);
 
-        setTimeout(function() {
+        setTimeout(function () {
             if (getOffset(el).top != cached.scroll.top) {
                 cached.scroll.top = getOffset(el).top;
                 recalcAllPos();
@@ -157,7 +161,7 @@ module.exports = (function(doc, _win) {
                 width: window.innerWidth || window.clientWidth,
                 height: window.innerHeight || window.clientHeight
             };
-        }else{
+        } else {
             return node.getBoundingClientRect();
         }
     }
@@ -166,9 +170,9 @@ module.exports = (function(doc, _win) {
         if (!el.inited) return;
 
         var boundingElement = findBoundingElement(el.node),
-            edge = boundingElement.scroll.top+getBoundingBox(boundingElement.node).top;
+            edge = boundingElement.scroll.top + getBoundingBox(boundingElement.node).top;
 
-        var currentMode = (edge <= el.limit.start? 0: edge >= el.limit.end? 2: 1);
+        var currentMode = (edge <= el.limit.start ? 0 : edge >= el.limit.end ? 2 : 1);
 
         if (el.mode != currentMode) {
             switchElementMode(el, currentMode);
@@ -206,8 +210,8 @@ module.exports = (function(doc, _win) {
     function deinitElement(el) {
         var deinitParent = true;
 
-        if(el.clone) {
-          killClone(el);
+        if (el.clone) {
+            killClone(el);
         }
         mergeObjects(el.node.style, el.css);
 
@@ -217,7 +221,8 @@ module.exports = (function(doc, _win) {
                 deinitParent = false;
                 break;
             }
-        };
+        }
+        ;
 
         if (deinitParent) el.parent.node.style.position = el.parent.css.position;
         el.mode = -1;
@@ -299,12 +304,12 @@ module.exports = (function(doc, _win) {
         el.node.parentNode.insertBefore(el.clone, refElement);
     }
 
-      function killClone(el) {
+    function killClone(el) {
         if (el.clone.parentNode) {
-          el.clone.parentNode.removeChild(el.clone);
+            el.clone.parentNode.removeChild(el.clone);
         }
         el.clone = undefined;
-      }
+    }
 
     function findBoundingElement(node) {
         if (node == document) {
@@ -316,14 +321,14 @@ module.exports = (function(doc, _win) {
         for (var i = 0; i < boundingElements.length; i++) {
             el = boundingElements[i];
 
-          if (el.node === node) {
-            return el;
-          }
+            if (el.node === node) {
+                return el;
+            }
         }
         //For React rendering during tests. React is rendering in a detached DOM node
         //So during rendering we can land here without the proper path up to the document (a DIV with no parent)
         return findBoundingElement(node.parentNode ? node.parentNode : document.getElementsByTagName('body')[0]);
-  }
+    }
 
     function getElementParams(node) {
         var computedStyle = getComputedStyle(node),
@@ -428,7 +433,7 @@ module.exports = (function(doc, _win) {
             boundingBox = getBoundingBox(findBoundingElement(node).node);
         }
 
-        return docOffsetTop+boundingBox.top;
+        return docOffsetTop + boundingBox.top;
     }
 
     function getElementOffset(node) {
@@ -444,8 +449,8 @@ module.exports = (function(doc, _win) {
     }
 
     function startFastCheckTimer() {
-        checkTimer = setInterval(function() {
-            if(!fastCheck()) {
+        checkTimer = setInterval(function () {
+            if (!fastCheck()) {
                 rebuild();
             }
         }, 500);
@@ -552,12 +557,14 @@ module.exports = (function(doc, _win) {
                     if (boundingElements[i].node === parent) return;
                 }
 
-            boundingElements.push({node: parent,
-              scroll: getOffset(parent)});
-          }
-          //For React rendering during tests. React is rendering in a detached DOM node
-          //So during rendering we can land here without the proper path up to the document (a DIV with no parent)
-          parent = parent.parentNode ? parent.parentNode : document.getElementsByTagName('body')[0];
+                boundingElements.push({
+                    node: parent,
+                    scroll: getOffset(parent)
+                });
+            }
+            //For React rendering during tests. React is rendering in a detached DOM node
+            //So during rendering we can land here without the proper path up to the document (a DIV with no parent)
+            parent = parent.parentNode ? parent.parentNode : document.getElementsByTagName('body')[0];
         }
     }
 
@@ -586,9 +593,10 @@ module.exports = (function(doc, _win) {
                 deinitElement(watchArray[i]);
                 watchArray.splice(i, 1);
             }
-        };
+        }
+        ;
     }
-    
+
 
     //expose Stickyfill
     var Stickyfill = {
@@ -603,9 +611,9 @@ module.exports = (function(doc, _win) {
     };
     //if jQuery is available -- create a plugin
     if (_win.jQuery) {
-        (function($) {
-            $.fn.Stickyfill = function(options) {
-                this.each(function() {
+        (function ($) {
+            $.fn.Stickyfill = function (options) {
+                this.each(function () {
                     Stickyfill.add(this);
                 });
 
