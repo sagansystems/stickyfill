@@ -594,6 +594,7 @@ module.exports = (function (doc, _win) {
                 watchArray.splice(i, 1);
             }
         }
+        ;
     }
 
 
