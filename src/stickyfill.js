@@ -10,7 +10,6 @@
 // it because of React / Morearty.
 
 (function(doc, _win) {
-  debugger;
   var watchArray = [],
     boundingElements = [{ node: _win }],
     initialized = false,
@@ -98,8 +97,6 @@
       updateScrollPos();
       recalcAllPos();
     }
-
-    watchArray.forEach(forceRedraw);
   }
 
   //fixes flickering
