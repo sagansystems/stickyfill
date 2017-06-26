@@ -565,7 +565,7 @@
   }
 
   //expose Stickyfill
-  var Stickyfill = {
+  _win.Stickyfill = {
     stickies: watchArray,
     add: add,
     remove: remove,

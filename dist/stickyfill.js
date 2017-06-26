@@ -1,6 +1,6 @@
 /*!
  * Stickyfill -- `position: sticky` polyfill
- * v. 1.1.4 | https://github.com/wilddeer/stickyfill
+ * v. 1.1.6 | https://github.com/wilddeer/stickyfill
  * Copyright Oleg Korsunsky | http://wd.dizaina.net/
  *
  * MIT License
@@ -572,7 +572,7 @@
   }
 
   //expose Stickyfill
-  var Stickyfill = {
+  _win.Stickyfill = {
     stickies: watchArray,
     add: add,
     remove: remove,
@@ -583,7 +583,7 @@
     kill: kill,
   };
 })(document, window);
-//if jQuery is available -- create a plugin
+
 if (window.jQuery) {
   (function($) {
     $.fn.Stickyfill = function(options) {
