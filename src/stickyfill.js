@@ -576,7 +576,6 @@
     kill: kill,
   };
 })(document, window);
-debugger;
 //if jQuery is available -- create a plugin
 if (window.jQuery) {
   (function($) {
