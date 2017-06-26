@@ -576,7 +576,7 @@
     kill: kill,
   };
 })(document, window);
-//if jQuery is available -- create a plugin
+
 if (window.jQuery) {
   (function($) {
     $.fn.Stickyfill = function(options) {
