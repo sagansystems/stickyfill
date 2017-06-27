@@ -13,16 +13,6 @@
         hiddenPropertyName = 'hidden',
         visibilityChangeEventName = 'visibilitychange';
 
-    // This fixes an issue in Chrome on Mac Retina screens
-    // sticky elements have to be forcefully redrawn,
-    // otherwise they are there, but invisible
-    function forceRedraw(el) {
-        var display = el.node.style.display;
-        el.node.style.display = 'none';
-        el.node.offsetHeight; // this is important
-        el.node.style.display = display;
-    }
-
     //fallback to prefixed names in old webkit browsers
     if (doc.webkitHidden !== undefined) {
         hiddenPropertyName = 'webkitHidden';
@@ -99,8 +89,6 @@
             updateScrollPos();
             recalcAllPos();
         }
-
-        watchArray.forEach(forceRedraw);
     }
 
     //fixes flickering
