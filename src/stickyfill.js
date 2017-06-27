@@ -1,47 +1,17 @@
-//This fork of the original stickyfill (https://github.com/wilddeer/stickyfill) lib comes from
-// https://github.com/google/ggrc-core/blob/develop/src/ggrc/assets/vendor/javascripts/stickyfill.js
-//It has been converted to work as a module and several jshint warnings were removed.
-//Also of note: React rendering during testing uses a detached DOM node. This was causing issues with stickyfill
-//because in 2 places (lines 314 and 549) the DOM is traversed upwards until the document is reached. In a detached
-//DOM node, the document is never reached. In these instances I manually jump to the body to continue traversal.
+// This comes from a fork of the original: https://github.com/Swizec/stickyfill
+// Changes have been submitted upstream, but as of 19.2.2015 hadn't been merged yet
 
-// Modified killClone to guard against the parent node not existing anymore - this is most likely a bandaid rather
-// than the proper solution, but it would seem to make sense that the clone's parent could be swooped from underneath
-// it because of React / Morearty.
-
-'use strict';
-
-module.exports = (function (doc, _win) {
-
-    if (!doc) {
-        doc = document;
-    }
-    if (!_win) {
-        _win = window;
-    }
-
-
+(function(doc, _win) {
     var watchArray = [],
         boundingElements = [{node: _win}],
         initialized = false,
         html = doc.documentElement,
-        noop = function () {
-        },
+        noop = function() {},
         checkTimer,
 
     //visibility API strings
         hiddenPropertyName = 'hidden',
         visibilityChangeEventName = 'visibilitychange';
-
-    // This fixes an issue in Chrome on Mac Retina screens
-    // sticky elements have to be forcefully redrawn,
-    // otherwise they are there, but invisible
-    function forceRedraw(el) {
-        var display = el.node.style.display;
-        el.node.style.display = 'none';
-        el.node.offsetHeight; // this is important
-        el.node.style.display = display;
-    }
 
     //fallback to prefixed names in old webkit browsers
     if (doc.webkitHidden !== undefined) {
@@ -50,7 +20,7 @@ module.exports = (function (doc, _win) {
     }
 
     //test getComputedStyle
-    if (!_win.getComputedStyle) {
+    if (!getComputedStyle) {
         seppuku();
     }
 
@@ -62,8 +32,7 @@ module.exports = (function (doc, _win) {
         try {
             block.style.position = prefixes[i] + 'sticky';
         }
-        catch (e) {
-        }
+        catch(e) {}
         if (block.style.position != '') {
             seppuku();
         }
@@ -89,10 +58,8 @@ module.exports = (function (doc, _win) {
     }
 
     function getOffset(el) {
-        return {
-            top: el.pageYOffset || el.scrollTop || 0,
-            left: el.pageXOffset || el.scrollLeft || 0
-        };
+        return {top: el.pageYOffset || el.scrollTop || 0,
+            left: el.pageXOffset || el.scrollLeft || 0};
     }
 
     function updateScrollPos() {
@@ -122,8 +89,6 @@ module.exports = (function (doc, _win) {
             updateScrollPos();
             recalcAllPos();
         }
-
-        watchArray.forEach(forceRedraw);
     }
 
     //fixes flickering
@@ -131,7 +96,7 @@ module.exports = (function (doc, _win) {
         var el = event.currentTarget,
             cached = getBoundingElement(el);
 
-        setTimeout(function () {
+        setTimeout(function() {
             if (getOffset(el).top != cached.scroll.top) {
                 cached.scroll.top = getOffset(el).top;
                 recalcAllPos();
@@ -154,7 +119,7 @@ module.exports = (function (doc, _win) {
                 width: window.innerWidth || window.clientWidth,
                 height: window.innerHeight || window.clientHeight
             };
-        } else {
+        }else{
             return node.getBoundingClientRect();
         }
     }
@@ -163,9 +128,9 @@ module.exports = (function (doc, _win) {
         if (!el.inited) return;
 
         var boundingElement = findBoundingElement(el.node),
-            edge = boundingElement.scroll.top + getBoundingBox(boundingElement.node).top;
+            edge = boundingElement.scroll.top+getBoundingBox(boundingElement.node).top;
 
-        var currentMode = (edge <= el.limit.start ? 0 : edge >= el.limit.end ? 2 : 1);
+        var currentMode = (edge <= el.limit.start? 0: edge >= el.limit.end? 2: 1);
 
         if (el.mode != currentMode) {
             switchElementMode(el, currentMode);
@@ -186,7 +151,7 @@ module.exports = (function (doc, _win) {
     }
 
     function initElement(el) {
-        if (isNaN(parseFloat(el.computed.top)) || el.isCell) return;
+        if (isNaN(parseFloat(el.computed.top)) || el.isCell || el.computed.display == 'none') return;
 
         el.inited = true;
 
@@ -203,9 +168,7 @@ module.exports = (function (doc, _win) {
     function deinitElement(el) {
         var deinitParent = true;
 
-        if (el.clone) {
-            killClone(el);
-        }
+        el.clone && killClone(el);
         mergeObjects(el.node.style, el.css);
 
         //check whether element's parent is used by other stickies
@@ -214,8 +177,7 @@ module.exports = (function (doc, _win) {
                 deinitParent = false;
                 break;
             }
-        }
-        ;
+        };
 
         if (deinitParent) el.parent.node.style.position = el.parent.css.position;
         el.mode = -1;
@@ -298,9 +260,7 @@ module.exports = (function (doc, _win) {
     }
 
     function killClone(el) {
-        if (el.clone.parentNode) {
-            el.clone.parentNode.removeChild(el.clone);
-        }
+        el.clone.parentNode && el.clone.parentNode.removeChild(el.clone);
         el.clone = undefined;
     }
 
@@ -314,13 +274,12 @@ module.exports = (function (doc, _win) {
         for (var i = 0; i < boundingElements.length; i++) {
             el = boundingElements[i];
 
-            if (el.node === node) {
+            if (el.node == node) {
                 return el;
             }
         }
-        //For React rendering during tests. React is rendering in a detached DOM node
-        //So during rendering we can land here without the proper path up to the document (a DIV with no parent)
-        return findBoundingElement(node.parentNode ? node.parentNode : document.getElementsByTagName('body')[0]);
+
+        return findBoundingElement(node.parentNode || document.body);
     }
 
     function getElementParams(node) {
@@ -340,7 +299,8 @@ module.exports = (function (doc, _win) {
                 marginBottom: computedStyle.marginBottom,
                 marginLeft: computedStyle.marginLeft,
                 marginRight: computedStyle.marginRight,
-                cssFloat: computedStyle.cssFloat
+                cssFloat: computedStyle.cssFloat,
+                display: computedStyle.display
             },
             numeric = {
                 top: parseNumeric(computedStyle.top),
@@ -426,7 +386,7 @@ module.exports = (function (doc, _win) {
             boundingBox = getBoundingBox(findBoundingElement(node).node);
         }
 
-        return docOffsetTop + boundingBox.top;
+        return docOffsetTop+boundingBox.top;
     }
 
     function getElementOffset(node) {
@@ -442,10 +402,8 @@ module.exports = (function (doc, _win) {
     }
 
     function startFastCheckTimer() {
-        checkTimer = setInterval(function () {
-            if (!fastCheck()) {
-                rebuild();
-            }
+        checkTimer = setInterval(function() {
+            !fastCheck() && rebuild();
         }, 500);
     }
 
@@ -550,14 +508,11 @@ module.exports = (function (doc, _win) {
                     if (boundingElements[i].node === parent) return;
                 }
 
-                boundingElements.push({
-                    node: parent,
-                    scroll: getOffset(parent)
-                });
+                boundingElements.push({node: parent,
+                    scroll: getOffset(parent)});
             }
-            //For React rendering during tests. React is rendering in a detached DOM node
-            //So during rendering we can land here without the proper path up to the document (a DIV with no parent)
-            parent = parent.parentNode ? parent.parentNode : document.getElementsByTagName('body')[0];
+
+            parent = parent.parentNode || document.body;
         }
     }
 
@@ -565,7 +520,7 @@ module.exports = (function (doc, _win) {
         //check if Stickyfill is already applied to the node
         for (var i = watchArray.length - 1; i >= 0; i--) {
             if (watchArray[i].node === node) return;
-        }
+        };
 
         var el = getElementParams(node);
 
@@ -586,13 +541,11 @@ module.exports = (function (doc, _win) {
                 deinitElement(watchArray[i]);
                 watchArray.splice(i, 1);
             }
-        }
-        ;
+        };
     }
 
-
     //expose Stickyfill
-    var Stickyfill = {
+    _win.Stickyfill = {
         stickies: watchArray,
         add: add,
         remove: remove,
@@ -602,18 +555,18 @@ module.exports = (function (doc, _win) {
         stop: stop,
         kill: kill
     };
-    //if jQuery is available -- create a plugin
-    if (_win.jQuery) {
-        (function ($) {
-            $.fn.Stickyfill = function (options) {
-                this.each(function () {
-                    Stickyfill.add(this);
-                });
+})(document, window);
 
-                return this;
-            };
-        })(_win.jQuery);
-    }
-    return Stickyfill;
-});
 
+//if jQuery is available -- create a plugin
+if (window.jQuery) {
+    (function($) {
+        $.fn.Stickyfill = function(options) {
+            this.each(function() {
+                Stickyfill.add(this);
+            });
+
+            return this;
+        };
+    })(window.jQuery);
+}
