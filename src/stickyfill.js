@@ -279,7 +279,7 @@
             }
         }
 
-        return findBoundingElement(node.parentNode);
+        return findBoundingElement(node.parentNode || document.body);
     }
 
     function getElementParams(node) {
@@ -512,7 +512,7 @@
                     scroll: getOffset(parent)});
             }
 
-            parent = parent.parentNode;
+            parent = parent.parentNode || document.body;
         }
     }
 
